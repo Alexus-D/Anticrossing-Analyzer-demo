@@ -196,7 +196,7 @@ def fit_spectrum(frequencies, s_spectrum, field_value, initial_params=None):
     # Функция для оптимизации
     def residuals(params_array):
         # Преобразование массива параметров в словарь
-        param_names = ['kappa', 'beta', 'wc', 'wm', 'J', 'Gamma', 'alpha', 'gamma']
+        param_names = ['wc', 'wm', 'J', 'Gamma', 'cavity_loss', 'magnon_loss']
         params_dict = dict(zip(param_names, params_array))
         
         # Вычисление теоретического спектра
@@ -210,7 +210,7 @@ def fit_spectrum(frequencies, s_spectrum, field_value, initial_params=None):
     
     try:
         # Начальные значения параметров как массив
-        param_names = ['kappa', 'beta', 'wc', 'wm', 'J', 'Gamma', 'alpha', 'gamma']
+        param_names = ['wc', 'wm', 'J', 'Gamma', 'cavity_loss', 'magnon_loss']
         initial_values = [initial_params[name] for name in param_names]
         
         # Оптимизация
@@ -364,8 +364,8 @@ def plot_parameters_vs_field(results_df):
         ('wm', 'Частота магнонной моды (ГГц)'),
         ('J', 'Когерентная связь J (ГГц)'),
         ('Gamma', 'Диссипативная связь Γ (ГГц)'),
-        ('kappa', 'Внешние потери резонатора κ (ГГц)'),
-        ('gamma', 'Внешние потери магнонов γ (ГГц)')
+        ('cavity_loss', 'Ширина линии резонатора (ГГц)'),
+        ('magnon_loss', 'Ширина линии магнонов (ГГц)')
     ]
     
     # Создание субплотов
@@ -521,10 +521,10 @@ def save_results(results_df, frequencies, fields, original_data, fitted_data):
         
         f.write(f"СРЕДНИЕ ЗНАЧЕНИЯ ПАРАМЕТРОВ:\n")
         f.write(f"{'-'*30}\n")
-        for param in ['wc', 'wm', 'J', 'Gamma', 'kappa', 'gamma', 'alpha', 'beta']:
+        for param in ['wc', 'wm', 'J', 'Gamma', 'cavity_loss', 'magnon_loss']:
             mean_val = results_df[param].mean()
             std_val = results_df[param].std()
-            f.write(f"{param:6s}: {mean_val:.4f} ± {std_val:.4f}\n")
+            f.write(f"{param:12s}: {mean_val:.4f} ± {std_val:.4f}\n")
         
         f.write(f"\nКАЧЕСТВО ПОДГОНКИ:\n")
         f.write(f"{'-'*20}\n")
