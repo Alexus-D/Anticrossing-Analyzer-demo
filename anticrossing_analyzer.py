@@ -86,6 +86,22 @@ def load_data(file_path):
         # Извлечение S-параметров (остальная матрица)
         s_params = data[1:, 1:]
         
+        # Обработка проблемных данных
+        if config.IGNORE_LAST_ROW and len(fields) > 1:
+            # Проверяем последнюю строку на проблемы (например, поле близко к нулю)
+            if fields[-1] < config.MIN_FIELD_THRESHOLD:
+                logger.warning(f"Игнорируем последнюю строку с подозрительным полем: {fields[-1]:.1f} Э")
+                fields = fields[:-1]
+                s_params = s_params[:-1, :]
+        
+        # Дополнительная фильтрация по минимальному полю
+        valid_field_mask = fields >= config.MIN_FIELD_THRESHOLD
+        if not np.all(valid_field_mask):
+            invalid_count = np.sum(~valid_field_mask)
+            logger.warning(f"Удаляем {invalid_count} строк с полем ниже {config.MIN_FIELD_THRESHOLD} Э")
+            fields = fields[valid_field_mask]
+            s_params = s_params[valid_field_mask, :]
+        
         logger.info(f"Данные загружены: {len(frequencies)} частот, {len(fields)} полей")
         logger.info(f"Диапазон частот: {frequencies.min():.2f} - {frequencies.max():.2f} ГГц")
         logger.info(f"Диапазон полей: {fields.min():.0f} - {fields.max():.0f} Э")

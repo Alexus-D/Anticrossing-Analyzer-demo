@@ -35,10 +35,18 @@ ANALYSIS_TYPE = 'S21'  # Можно изменить на 'S12'
 NUM_MODES = None
 
 # Диапазон частот для анализа (ГГц) - None для использования всего диапазона
-FREQUENCY_RANGE = None  # Например: (8.0, 12.0)
+FREQUENCY_RANGE = (3.4, 3.9)  # Например: (8.0, 12.0)
 
 # Диапазон полей для анализа (Э) - None для использования всего диапазона
-FIELD_RANGE = None  # Например: (1000, 5000)
+FIELD_RANGE = (2875, 3040)  # Например: (1000, 5000)
+
+# Параметры обработки данных
+IGNORE_LAST_ROW = True  # Игнорировать последнюю строку данных (обычно содержит ошибочные данные)
+MIN_FIELD_THRESHOLD = 10  # Минимальное значение поля для валидных данных (Э)
+
+# Параметры расчета частоты ФМР
+GYROMAGNETIC_RATIO = 2.8e-3  # Гиромагнитное отношение (ГГц/Э)
+ANISOTROPY_FIELD = 0  # Поле анизотропии (Э) - сдвиг частоты ФМР от нуля
 
 # =============================================================================
 # ПАРАМЕТРЫ ФИТИНГА
@@ -147,7 +155,7 @@ def theoretical_model(freq, field, params, analysis_type='S21'):
     
     return S_param
 
-def calculate_magnon_frequency(field, gamma_factor=2.8e-3, h_anisotropy=0):
+def calculate_magnon_frequency(field, gamma_factor=None, h_anisotropy=None):
     """
     Вычисление частоты магнонной моды в зависимости от поля
     
@@ -155,16 +163,21 @@ def calculate_magnon_frequency(field, gamma_factor=2.8e-3, h_anisotropy=0):
     -----------
     field : float
         Магнитное поле (Э)
-    gamma_factor : float
-        Гиромагнитное отношение (ГГц/Э)
-    h_anisotropy : float
-        Поле анизотропии (Э)
+    gamma_factor : float, optional
+        Гиромагнитное отношение (ГГц/Э). Если None, используется GYROMAGNETIC_RATIO
+    h_anisotropy : float, optional
+        Поле анизотропии (Э). Если None, используется ANISOTROPY_FIELD
         
     Returns:
     --------
     freq : float
         Частота магнонной моды (ГГц)
     """
+    if gamma_factor is None:
+        gamma_factor = GYROMAGNETIC_RATIO
+    if h_anisotropy is None:
+        h_anisotropy = ANISOTROPY_FIELD
+    
     return gamma_factor * (field + h_anisotropy)
 
 # =============================================================================
